@@ -1,0 +1,20 @@
+PDF_Luis — archivos para publicar
+=================================
+
+SUBE A GITHUB TODOS LOS ARCHIVOS DE ESTA CARPETA, tal como están y con el
+mismo nombre. No cambies "index.html" ni "sw.js": la app los busca así.
+
+Pasos (una sola vez):
+ 1. En github.com crea un repositorio nuevo llamado:  pdf-luis
+    Déjalo en "Public".
+ 2. Add file -> Upload files -> arrastra TODOS los archivos de esta carpeta.
+ 3. Baja y pulsa "Commit changes".
+ 4. Settings -> Pages -> Branch: main, carpeta: / (root) -> Save.
+ 5. Espera 1 a 3 minutos y recarga. Aparecerá tu enlace.
+
+Para actualizar la app más adelante: subes el index.html nuevo al mismo
+repositorio (Add file -> Upload files -> Commit changes). Todos tus clientes
+reciben la mejora la próxima vez que abran la app. No tienen que reinstalar.
+
+IMPORTANTE: el archivo "generador-claves.html" NO va aquí. Ese se queda solo
+en tu PC, porque contiene la clave privada con la que se crean las licencias.
