@@ -129,6 +129,13 @@ input[type=range]{width:100%;margin:8px 0 0}
   background:#1D4E9E;color:#fff;border-color:#1D4E9E}
 .licpie{color:#8FA2B8;font-size:13px;margin-top:22px;line-height:1.5}
 #licNom{color:var(--muted);font-size:13px;margin:12px 0 0}
+.btnInst{width:100%;margin-top:14px;min-height:48px;font-weight:600}
+.licinst{background:transparent;color:#fff;border-color:#41566F}
+.appinst{background:#fff;color:var(--ink);border-color:var(--line)}
+#insBox{position:fixed;inset:0;background:rgba(20,35,61,.55);display:grid;place-items:center;z-index:70;padding:16px}
+#insBox .mbox{text-align:left}
+#insBox ol{margin:0 0 14px;padding-left:20px}
+#insBox li{margin:7px 0}
 [hidden]{display:none!important}
 #toast{position:fixed;left:50%;top:64px;transform:translate(-50%,10px);background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -154,6 +161,7 @@ input[type=range]{width:100%;margin:8px 0 0}
       <li>Coloca la firma, ajusta el tamaño y exporta.</li>
     </ol>
     <p class="note">Todo se procesa en tu celular. Los archivos no se suben a internet.</p>
+    <button class="btnInst appinst">📲 Instalar en este dispositivo</button>
   </div>
   <div id="pageWrap" hidden><canvas id="cv"></canvas><div id="ov"></div></div>
 </main>
@@ -1686,6 +1694,7 @@ preguntarRecuperar();
       placeholder="Pega aquí la clave que recibiste"></textarea>
     <p class="licerr" id="licErr" hidden></p>
     <button id="licBtn" class="licbtn">Activar</button>
+    <button class="btnInst licinst">📲 Instalar en este dispositivo</button>
     <p class="licpie">¿Todavía no tienes clave? Escríbeme y te la envío.</p>
   </div>
 </section>
@@ -1766,6 +1775,48 @@ async function inicio(){
 G('licBtn').onclick=activar;
 G('licKey').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))activar();});
 inicio();
+
+/* ---- instalar como app ---- */
+let pedir=null;
+const instalada=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function pintaInst(){
+  const v=!instalada();
+  document.querySelectorAll('.btnInst').forEach(b=>{b.hidden=!v;});
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();pedir=e;pintaInst();});
+window.addEventListener('appinstalled',()=>{pedir=null;pintaInst();});
+function comoInstalar(){
+  const ua=navigator.userAgent||'';
+  const ios=/iPhone|iPad|iPod/i.test(ua);
+  const enApp=/FBAN|FBAV|Instagram|Line\/|WhatsApp/i.test(ua);
+  let pasos;
+  if(enApp)pasos=['Toca el menú de los tres puntos de esta ventana.','Elige "Abrir en Chrome" o "Abrir en el navegador".','Ya en Chrome, vuelve a tocar este botón.'];
+  else if(ios)pasos=['Toca el botón Compartir, el cuadrado con la flecha hacia arriba.','Desliza y elige "Añadir a pantalla de inicio".','Toca "Añadir".'];
+  else pasos=['Toca el menú ⋮ , arriba a la derecha de Chrome.','Elige "Instalar aplicación" o "Agregar a pantalla principal".','Confirma con "Instalar".'];
+  const d=document.createElement('div');d.id='insBox';
+  const c=document.createElement('div');c.className='mbox';
+  const h=document.createElement('h2');h.textContent=enApp?'Ábrela en Chrome':'Cómo instalarla';
+  c.appendChild(h);
+  const ol=document.createElement('ol');
+  pasos.forEach(p=>{const li=document.createElement('li');li.textContent=p;ol.appendChild(li);});
+  c.appendChild(ol);
+  const row=document.createElement('div');row.className='mrow';
+  const b=document.createElement('button');b.className='primary';b.textContent='Entendido';
+  b.onclick=()=>d.remove();row.appendChild(b);c.appendChild(row);
+  d.appendChild(c);d.onclick=e=>{if(e.target===d)d.remove();};
+  document.body.appendChild(d);
+}
+document.querySelectorAll('.btnInst').forEach(b=>{
+  b.onclick=async()=>{
+    if(pedir){
+      pedir.prompt();
+      try{await pedir.userChoice;}catch(_){}
+      pedir=null;pintaInst();return;
+    }
+    comoInstalar();
+  };
+});
+pintaInst();
 
 /* funcionar sin internet */
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
